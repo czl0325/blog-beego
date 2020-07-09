@@ -47,13 +47,6 @@ textarea {
     margin: 0;
 }
 
-a, button, input {
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    -webkit-user-modify: read-write-plaintext-only;
-    outline: none;
-    border: none;
-}
-
 html {
     box-sizing: border-box;
 }
@@ -79,21 +72,26 @@ table {
 
 td,
 th {
-    padding: 5px 20px;
-    box-sizing: border-box;
+    padding: 0;
 }
 
 td:not([align]),
 th:not([align]) {
-    text-align: center;
+    text-align: left;
 }
 
-table td {
-    word-break: keep-all;
-    white-space: nowrap;
+/* custom */
+a {
+    outline: none;
+    color: #16418a;
+    text-decoration: none;
+    -webkit-backface-visibility: hidden;
 }
 
-table th {
-    word-break: keep-all;
-    white-space: nowrap;
+a:focus {
+    outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: -webkit-focus-ring-color auto 0;
 }
