@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+{{ template "header" .}}
+<body>
+{{ template "navbar" .}}
+<div class="container">
+    <h1><a href="/topic/modify/{{ .Id }}">{{ .Topic.Title }}</a></h1>
+    <p>{{ .Topic.Content }}</p>
+</div>
+</body>
+</html>

@@ -6,7 +6,7 @@
 
 <div class="container">
     <h1>分类列表</h1>
-    <form method="get" action="/category?op=add">
+    <form method="post" action="/category/add">
         <div class="form-group">
             <label for="account">分类名称</label>
             <input class="form-control" id="name" name="name" placeholder="请输入分类名称">
@@ -16,20 +16,24 @@
 
     <table class="table table-striped">
         <thead>
+        <tr>
             <th>序号</th>
             <th>名称</th>
             <th>文章数</th>
             <th>操作</th>
+        </tr>
         </thead>
         <tbody>
-            {{ range .Categories }}
+        {{ range .Categories }}
+            <tr>
                 <td>{{ .Id }}</td>
                 <td>{{ .Title }}</td>
                 <td>{{ .TopicCount }}</td>
                 <td>
-                    <a href="/category?op=del&id={{.Id}}">删除</a>
+                    <a href="/category/del&id={{.Id}}">删除</a>
                 </td>
-            {{ end }}
+            </tr>
+        {{ end }}
         </tbody>
     </table>
 </div>

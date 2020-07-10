@@ -15,4 +15,17 @@
             </div>
         </div>
     </div>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            let name = getCookie("name")
+            if (name) {
+                $("#uname").html(name + "   退出")
+                $("#uname").attr("href", "/login?exit=true")
+            } else {
+                $("#uname").html("管理员登录")
+                $("#uname").attr("href", "/login")
+            }
+        })
+    </script>
 {{ end }}

@@ -4,24 +4,15 @@
 <body>
 {{ template "navbar" .}}
 <div class="container">
-    <div class="page-header">
-        <h1>我的第一篇博客</h1>
-        <h6 class="text-muted">文章发表于xxxx</h6>
-        <p>大家好</p>
-    </div>
+    {{ range .Topics }}
+        <a class="page-header" style="text-decoration: none;color:inherit;" href="/topic/view/{{ .Id }}">
+            <h1>{{ .Title }}</h1>
+            <h6 class="text-muted">文章发表于{{ .CreateTime }}，共{{ .Views }}次浏览，共{{ .ReplyCount }}条评论</h6>
+            <p>{{ .Content }}</p>
+        </a>
+    {{ end }}
 </div>
 
-<script type="text/javascript">
-    $(document).ready(function () {
-        let name = getCookie("name")
-        if (name) {
-            $("#uname").html(name + "   退出")
-            $("#uname").attr("href", "/login?exit=true")
-        } else {
-            $("#uname").html("管理员登录")
-            $("#uname").attr("href", "/login")
-        }
-    })
-</script>
+
 </body>
 </html>
