@@ -63,8 +63,13 @@ func (c *TopicController) View() {
 		c.Redirect("/", 302)
 		return
 	}
+	topic.Comments, err = models.GetAllComment(id)
+	if err != nil {
+		println(err.Error())
+		c.Redirect("/", 302)
+		return
+	}
 	c.Data["Topic"] = topic
-	c.Data["Id"] = id
 	c.TplName = "topic_view.html"
 }
 

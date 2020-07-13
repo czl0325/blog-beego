@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -30,15 +31,24 @@ type Topic struct {
 	Cname           string
 	Title           string
 	Content         string `orm:"size(5000)"`
-	Labels			string
+	Labels          string
 	Attachment      string
 	CreateTime      time.Time `orm:"auto_now_add;type(datetime)"`
 	UpdateTime      time.Time `orm:"auto_now;type(datetime)"`
 	Views           int64     `orm:"default(0)"`
 	Author          string
-	ReplyTime       time.Time `orm:"null"`
-	ReplyCount      int64     `orm:"default(0)"`
-	ReplyLastUserId int64     `orm:"null"`
+	ReplyTime       time.Time  `orm:"null"`
+	ReplyCount      int64      `orm:"default(0)"`
+	ReplyLastUserId int64      `orm:"null"`
+	Comments        []*Comment `orm:"reverse(many)"`
+}
+
+type Comment struct {
+	Id         int64
+	Name       string
+	Content    string
+	CreateTime time.Time `orm:"auto_now_add;type(datetime)"`
+	Topic      *Topic `orm:"rel(fk)"`
 }
 
 func RegisterDB() {
@@ -48,9 +58,10 @@ func RegisterDB() {
 		os.Create(DB_NAME)
 	}
 
-	orm.RegisterModel(new(Category), new(Topic))
+	orm.RegisterModel(new(Category), new(Topic), new(Comment))
 	orm.RegisterDriver(SQLITE3_DRIVER, orm.DRSqlite)
 	orm.RegisterDataBase("default", SQLITE3_DRIVER, DB_NAME, 10)
+	orm.DefaultTimeLoc = time.UTC
 }
 
 func GetAllCategory() ([]*Category, error) {
@@ -228,4 +239,49 @@ func DeleteTopic(id string) error {
 	}
 	_, err = o.Delete(topic)
 	return err
+}
+
+func AddComment(tid, name, content string) error {
+	o := orm.NewOrm()
+
+	name = strings.Replace(name, " ", "", -1)
+	content = strings.Replace(content, " ", "", -1)
+
+	topic, err := GetTopicById(tid)
+	if err != nil {
+		println(err)
+		return err
+	}
+
+	if name == "" || content == "" {
+		println("评论姓名和内容不能为空")
+		return errors.New("评论姓名和内容不能为空")
+	}
+
+	comment := &Comment{
+		Name:    name,
+		Topic:   topic,
+		Content: content,
+	}
+
+	_, err = o.Insert(comment)
+	if err != nil {
+		println(err)
+		return err
+	}
+
+	return nil
+}
+
+func GetAllComment(tid string) ([]*Comment, error) {
+	o := orm.NewOrm()
+
+	qs := o.QueryTable("comment")
+	comments := make([]*Comment, 0)
+	_, err := qs.Filter("topic_id", tid).OrderBy("-CreateTime").All(&comments)
+	if err != nil {
+		println(err)
+		return []*Comment{}, err
+	}
+	return comments, nil
 }

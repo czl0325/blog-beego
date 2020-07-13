@@ -4,8 +4,35 @@
 <body>
 {{ template "navbar" .}}
 <div class="container">
-    <h1><a href="/topic/modify/{{ .Id }}">{{ .Topic.Title }}</a></h1>
+    <h1><a href="/topic/modify/{{ .Topic.Id }}">{{ .Topic.Title }}</a></h1>
     <p>{{ .Topic.Content }}</p>
+
+    <div class="list-group" style="margin-top: 2em;">
+        {{ range .Topic.Comments }}
+            <div class="list-group-item">
+                <div class="list-group-item-heading">
+                    {{ .Name }} <span class="text-muted">{{ .CreateTime }}</span>
+                </div>
+                <p class="list-group-item-text">{{ .Content }}</p>
+            </div>
+        {{ end }}
+    </div>
+
+    <form method="post" action="/comment/add">
+        <input hidden name="tid" value="{{ .Topic.Id }}">
+        <div class="input-group" style="margin-top: 2em;">
+            <span class="input-group-addon" id="sizing-addon2">姓名：</span>
+            <input type="text" class="form-control" placeholder="请输入姓名" aria-describedby="sizing-addon2" name="name">
+        </div>
+
+        <div class="input-group" style="margin-top: 1em;">
+            <input type="text" class="form-control" placeholder="请输入评论内容" name="content">
+            <span class="input-group-btn">
+        <button class="btn btn-default" type="submit">发表评论</button>
+      </span>
+        </div>
+    </form>
+
 </div>
 </body>
 </html>
