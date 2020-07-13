@@ -25,22 +25,22 @@ type Category struct {
 }
 
 type Topic struct {
-	Id              int64
-	Uid             int64
-	Cid             int64
-	Cname           string
-	Title           string
-	Content         string `orm:"size(5000)"`
-	Labels          string
-	Attachment      string
-	CreateTime      time.Time `orm:"auto_now_add;type(datetime)"`
-	UpdateTime      time.Time `orm:"auto_now;type(datetime)"`
-	Views           int64     `orm:"default(0)"`
-	Author          string
-	ReplyTime       time.Time  `orm:"null"`
-	ReplyCount      int64      `orm:"default(0)"`
-	ReplyLastUserId int64      `orm:"null"`
-	Comments        []*Comment `orm:"reverse(many)"`
+	Id            int64
+	Uid           int64
+	Cid           int64
+	Cname         string
+	Title         string
+	Content       string `orm:"size(5000)"`
+	Labels        string
+	Attachment    string
+	CreateTime    time.Time `orm:"auto_now_add;type(datetime)"`
+	UpdateTime    time.Time `orm:"auto_now;type(datetime)"`
+	Views         int64     `orm:"default(0)"`
+	Author        string
+	ReplyTime     time.Time  `orm:"null"`
+	ReplyCount    int64      `orm:"default(0)"`
+	ReplyLastName string     `orm:"null"`
+	Comments      []*Comment `orm:"reverse(many)"`
 }
 
 type Comment struct {
@@ -48,7 +48,7 @@ type Comment struct {
 	Name       string
 	Content    string
 	CreateTime time.Time `orm:"auto_now_add;type(datetime)"`
-	Topic      *Topic `orm:"rel(fk)"`
+	Topic      *Topic    `orm:"rel(fk)"`
 }
 
 func RegisterDB() {
@@ -90,7 +90,7 @@ func DeleteCategory(id int64) error {
 	return err
 }
 
-func AddTopic(id, title, cid, content string) error {
+func AddTopic(id, title, cid, labels, content string) error {
 	o := orm.NewOrm()
 	var err error
 
@@ -108,12 +108,18 @@ func AddTopic(id, title, cid, content string) error {
 		return errors.New("查无此分类")
 	}
 
+	labels = strings.Replace(labels, " ", "", -1)
+	if labels != "" {
+		labels = "$" + strings.Join(strings.Split(labels, ","), "#$") + "#"
+	}
+
 	topic := &Topic{
 		Uid:        0,
 		Cid:        category.Id,
 		Cname:      category.Title,
 		Title:      title,
 		Content:    content,
+		Labels:     labels,
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
 	}
@@ -133,7 +139,7 @@ func AddTopic(id, title, cid, content string) error {
 	return err
 }
 
-func ModifyTopic(id, title, cid, content string) error {
+func ModifyTopic(id, title, cid, labels, content string) error {
 	o := orm.NewOrm()
 	var err error
 
@@ -264,12 +270,23 @@ func AddComment(tid, name, content string) error {
 		Content: content,
 	}
 
+	o.Begin()
 	_, err = o.Insert(comment)
 	if err != nil {
 		println(err)
+		o.Rollback()
 		return err
 	}
-
+	topic.ReplyCount++
+	topic.ReplyTime = time.Now()
+	topic.ReplyLastName = comment.Name
+	_, err = o.Update(topic)
+	if err != nil {
+		println(err)
+		o.Rollback()
+		return err
+	}
+	o.Commit()
 	return nil
 }
 

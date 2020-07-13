@@ -4,7 +4,12 @@
 <body>
 {{ template "navbar" .}}
 <div class="container">
-    <h1><a href="/topic/modify/{{ .Topic.Id }}">{{ .Topic.Title }}</a></h1>
+    <h4><a href="/topic/modify/{{ .Topic.Id }}">{{ .Topic.Title }}</a></h4>
+    <div>
+        {{ range .Labels }}
+            <span class="label label-default"><a href="/?l={{ . }}">{{ . }}</a></span>
+        {{ end }}
+    </div>
     <p>{{ .Topic.Content }}</p>
 
     <div class="list-group" style="margin-top: 2em;">
