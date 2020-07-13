@@ -30,6 +30,7 @@ type Topic struct {
 	Cname           string
 	Title           string
 	Content         string `orm:"size(5000)"`
+	Labels			string
 	Attachment      string
 	CreateTime      time.Time `orm:"auto_now_add;type(datetime)"`
 	UpdateTime      time.Time `orm:"auto_now;type(datetime)"`
@@ -88,7 +89,7 @@ func AddTopic(id, title, cid, content string) error {
 	}
 	category := new(Category)
 	qs := o.QueryTable("category")
-	err = qs.Filter("id", _cid).One(&category)
+	err = qs.Filter("id", _cid).One(category)
 	if err != nil {
 		return err
 	}
@@ -105,20 +106,92 @@ func AddTopic(id, title, cid, content string) error {
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
 	}
-	if len(id) != 0 {
-		topic.Id, _ = strconv.ParseInt(id, 10, 64)
-		_, err = o.Update(topic)
-	} else {
-		_, err = o.Insert(topic)
+	o.Begin()
+	_, err = o.Insert(topic)
+	if err != nil {
+		o.Rollback()
+		return err
 	}
+	category.TopicCount++
+	_, err = o.Update(category)
+	if err != nil {
+		o.Rollback()
+		return err
+	}
+	o.Commit()
 	return err
 }
 
-func GetAllTopic(desc bool) ([]*Topic, error) {
+func ModifyTopic(id, title, cid, content string) error {
+	o := orm.NewOrm()
+	var err error
+
+	_cid, err := strconv.ParseInt(cid, 10, 64)
+	if err != nil {
+		return err
+	}
+	newCate := new(Category)
+	qs := o.QueryTable("category")
+	err = qs.Filter("id", _cid).One(newCate)
+	if err != nil {
+		return err
+	}
+
+	_id, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return err
+	}
+	topic := &Topic{
+		Id: _id,
+	}
+	err = o.Read(topic)
+	if err != nil {
+		return err
+	}
+	oldCid := topic.Cid
+	o.Begin()
+	if oldCid != _cid {
+		newCate.TopicCount += 1
+		oldCate := new(Category)
+		qs := o.QueryTable("category")
+		err = qs.Filter("id", topic.Cid).One(oldCate)
+		oldCate.TopicCount -= 1
+		if oldCate.TopicCount < 0 {
+			oldCate.TopicCount = 0
+		}
+		_, err = o.Update(newCate)
+		if err != nil {
+			o.Rollback()
+			return err
+		}
+		_, err = o.Update(oldCate)
+		if err != nil {
+			o.Rollback()
+			return err
+		}
+		topic.Cid = newCate.Id
+		topic.Cname = newCate.Title
+	}
+	topic.Title = title
+	topic.Content = content
+	_, err = o.Update(topic)
+	if err != nil {
+		o.Rollback()
+		return err
+	}
+	o.Commit()
+	return nil
+}
+
+func GetAllTopic(desc bool, cid string) ([]*Topic, error) {
 	o := orm.NewOrm()
 	topics := make([]*Topic, 0)
 	qs := o.QueryTable("topic")
 	var err error
+	_cid, err := strconv.ParseInt(cid, 10, 64)
+	if err == nil {
+		qs = qs.Filter("cid", _cid)
+	}
 	if desc {
 		_, err = qs.OrderBy("-CreateTime").All(&topics)
 	} else {

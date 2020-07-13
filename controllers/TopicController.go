@@ -12,7 +12,7 @@ type TopicController struct {
 func (c *TopicController) Get() {
 	c.Data["Title"] = "文章"
 	c.Data["HomeIndex"] = 2
-	topics, err :=  models.GetAllTopic(false)
+	topics, err :=  models.GetAllTopic(false, "")
 	if err != nil {
 		println(err.Error())
 	}
@@ -29,10 +29,15 @@ func (c *TopicController) Post() {
 
 	title := c.Input().Get("title")
 	content := c.Input().Get("content")
-	category := c.Input().Get("category")
+	cid := c.Input().Get("cid")
 	id := c.Input().Get("id")
 
-	err := models.AddTopic(id, title, category, content)
+	var err error
+	if id != "" {
+		err = models.ModifyTopic(id, title, cid, content)
+	} else {
+		err = models.AddTopic(id, title, cid, content)
+	}
 	if err != nil {
 		println(err.Error())
 	}
@@ -72,6 +77,11 @@ func (c *TopicController) Modify() {
 		c.Redirect("/", 302)
 		return
 	}
+	categories, err := models.GetAllCategory()
+	if err != nil {
+		println(err)
+	}
+	c.Data["Categories"] = categories
 	c.Data["Topic"] = topic
 	c.TplName = "topic_modify.html"
 }

@@ -4,13 +4,28 @@
 <body>
 {{ template "navbar" .}}
 <div class="container">
-    {{ range .Topics }}
-        <a class="page-header" style="text-decoration: none;color:inherit;" href="/topic/view/{{ .Id }}">
-            <h1>{{ .Title }}</h1>
-            <h6 class="text-muted">文章发表于{{ .CreateTime }}，共{{ .Views }}次浏览，共{{ .ReplyCount }}条评论</h6>
-            <p>{{ .Content }}</p>
-        </a>
-    {{ end }}
+    <div class="container col-md-9 col-sm-9">
+        {{ range .Topics }}
+            <a class="page-header" style="text-decoration: none;color:inherit;" href="/topic/view/{{ .Id }}">
+                <h1>{{ .Title }}</h1>
+                <h6 class="text-muted">文章发表于{{ .CreateTime }}，共{{ .Views }}次浏览，共{{ .ReplyCount }}条评论</h6>
+                <p>{{ .Content }}</p>
+            </a>
+        {{ end }}
+    </div>
+    <div class="container col-md-3 col-sm-3">
+        <h2>文章分类</h2>
+        <table class="table table-striped">
+            <tr>
+                <td><a href="/">全部</a></td>
+            </tr>
+            {{ range .Categories }}
+            <tr>
+                <td><a href="/?c={{ .Id }}">{{ .Title }}</a></td>
+            </tr>
+            {{ end }}
+        </table>
+    </div>
 </div>
 
 
