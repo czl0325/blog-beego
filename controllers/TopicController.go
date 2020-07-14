@@ -13,7 +13,7 @@ type TopicController struct {
 func (c *TopicController) Get() {
 	c.Data["Title"] = "文章"
 	c.Data["HomeIndex"] = 2
-	topics, err := models.GetAllTopic(false, "")
+	topics, err := models.GetAllTopic(false, "", "")
 	if err != nil {
 		println(err.Error())
 	}
@@ -76,6 +76,19 @@ func (c *TopicController) View() {
 	for index := range labels {
 		labels[index] = strings.Replace(labels[index], "$", "", -1)
 	}
+	for  {
+		num := 0
+		for index := range labels {
+			if labels[index] == "" {
+				num = 1
+				labels = append(labels[:index], labels[index+1:]...)
+				break
+			}
+		}
+		if num == 0 {
+			break
+		}
+	}
 	c.Data["Labels"] = labels
 	c.TplName = "topic_view.html"
 }
@@ -94,6 +107,24 @@ func (c *TopicController) Modify() {
 		println(err)
 	}
 	c.Data["Categories"] = categories
+	labels := strings.Split(topic.Labels, "#")
+	for index := range labels {
+		labels[index] = strings.Replace(labels[index], "$", "", -1)
+	}
+	for  {
+		num := 0
+		for index := range labels {
+			if labels[index] == "" {
+				num = 1
+				labels = append(labels[:index], labels[index+1:]...)
+				break
+			}
+		}
+		if num == 0 {
+			break
+		}
+	}
+	topic.Labels = strings.Join(labels, ",")
 	c.Data["Topic"] = topic
 	c.TplName = "topic_modify.html"
 }

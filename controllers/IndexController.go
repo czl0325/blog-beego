@@ -12,7 +12,7 @@ type IndexController struct {
 func (c *IndexController) Get() {
 	c.Data["Title"] = "博客"
 	c.Data["HomeIndex"] = 0
-	topics, err :=  models.GetAllTopic(true, c.Input().Get("c"))
+	topics, err :=  models.GetAllTopic(true, c.Input().Get("c"), c.Input().Get("l"))
 	if err != nil {
 		println(err.Error())
 	}

@@ -200,7 +200,7 @@ func ModifyTopic(id, title, cid, labels, content string) error {
 	return nil
 }
 
-func GetAllTopic(desc bool, cid string) ([]*Topic, error) {
+func GetAllTopic(desc bool, cid, label string) ([]*Topic, error) {
 	o := orm.NewOrm()
 	topics := make([]*Topic, 0)
 	qs := o.QueryTable("topic")
@@ -208,6 +208,9 @@ func GetAllTopic(desc bool, cid string) ([]*Topic, error) {
 	_cid, err := strconv.ParseInt(cid, 10, 64)
 	if err == nil {
 		qs = qs.Filter("cid", _cid)
+	}
+	if label != "" {
+		qs = qs.Filter("labels__contains", "$"+label+"#")
 	}
 	if desc {
 		_, err = qs.OrderBy("-CreateTime").All(&topics)

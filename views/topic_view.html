@@ -7,10 +7,10 @@
     <h4><a href="/topic/modify/{{ .Topic.Id }}">{{ .Topic.Title }}</a></h4>
     <div>
         {{ range .Labels }}
-            <span class="label label-default"><a href="/?l={{ . }}">{{ . }}</a></span>
+            <span class="label"><a href="/?l={{ . }}">{{ . }}</a></span>
         {{ end }}
     </div>
-    <p>{{ .Topic.Content }}</p>
+    <p style="margin-top: 2em;">{{ .Topic.Content }}</p>
 
     <div class="list-group" style="margin-top: 2em;">
         {{ range .Topic.Comments }}
