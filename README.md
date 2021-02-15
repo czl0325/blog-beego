@@ -6,6 +6,16 @@ beego开发个人博客项目，视频位于https://pan.baidu.com/s/1gultXms_P6u
 
 * 博客分类增删改查，文章增删改查，评论增删改查，文章与评论的一对多关系
 
+
+#### 编译运行
+
+* 下载工程后执行`go build`，如果遇到网络问题请设置代理，在终端执行
+```bigquery
+go env -w GO111MODULE=on
+go env -w GOPROXY=https://goproxy.cn,direct
+```
+运行命令 `bee run`
+
 #### 表结构设计
 
 ```go
@@ -46,3 +56,4 @@ type Comment struct {
 	CreateTime time.Time `orm:"auto_now_add;type(datetime)"`
 }
 ```
+
